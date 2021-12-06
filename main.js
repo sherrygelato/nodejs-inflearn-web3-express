@@ -6,6 +6,12 @@ var compression = require('compression')
 var bodyParser = require('body-parser')
 var fs = require('fs')
 
+// 보안 
+// HTTP 헤더를 적절히 설정하여 
+// 몇 가지 잘 알려진 웹 취약성으로부터 앱을 보호
+var helmet = require('helmet')
+app.use(helmet()) // 미들웨어 load
+
 var indexRouter = require('./routes/index')
 var topicRouter = require('./routes/topic')
 
