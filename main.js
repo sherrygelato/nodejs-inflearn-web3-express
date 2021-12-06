@@ -5,11 +5,8 @@ const port = 3000
 var compression = require('compression')
 var bodyParser = require('body-parser')
 var fs = require('fs')
-var template = require('./lib/template.js')
-var path = require('path')
-var sanitizeHtml = require('sanitize-html')
-var qs = require('querystring')
-const { request } = require('http')
+
+var indexRouter = require('./routes/index')
 var topicRouter = require('./routes/topic')
 
 // public 안에서 static 찾기
@@ -55,35 +52,9 @@ app.use(function (request, response, next) {
 })
 */
 
+app.use('/', indexRouter)
 // /topic으로 된 path에 topicRouter란 미들웨어 적용
 app.use('/topic', topicRouter)
-
-// 결국 뒤에 함수가 미들웨어였다.
-app.get('/', (request, response) => {
-  var title = 'Welcome';
-  var description = 'Hello, Node.js';
-  var list = template.list(request.list);
-  var html = template.HTML(title, list,
-    `<h2>${title}</h2>${description}
-    <img src="/images/star.jpg" style="width:300px; display:block; margin-top:10px;">
-    `,
-    `<a href="/topic/create">create</a>`
-  );
-  response.send(html);
-
-  /* 글 목록 표현
-  fs.readdir('./data', function (error, filelist) { 
-    var title = 'Welcome';
-    var description = 'Hello, Node.js';
-    var list = template.list(filelist);
-    var html = template.HTML(title, list,
-      `<h2>${title}</h2>${description}`,
-      `<a href="/create">create</a>`
-    );
-    response.send(html);
-  });
-  */
-})
 
 // 404 middleware 추가
 // 순차적으로 실행 되기 때문에 더이상 실행되지 못하고
