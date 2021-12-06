@@ -2,12 +2,26 @@ const express = require('express')
 const app = express()
 const port = 3000
 
+var bodyParser = require('body-parser')
 var fs = require('fs')
 var template = require('./lib/template.js')
 var path = require('path')
 var sanitizeHtml = require('sanitize-html')
 var qs = require('querystring')
 const { request } = require('http')
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+/*
+bodyParser.urlencoded({ extended: false })
+- middleware가 들어오게 된다.
+- bodyParser가 만들어내는 middleware를 표현한다. 
+- 사용자가 요청할 때마다 미들웨어가 실행된다.
+
+post의 경우 callback 함수를 호출하고,
+callback의 첫번째 인자인 request에 body를 생성하면서
+
+*/
 
 /*
 route, routing
@@ -73,7 +87,7 @@ app.get('/create', (request, response) => {
 })
 
 app.post('/create_process', (request, response) => {
-  var body = '';
+  /*var body = '';
   request.on('data', function(data){
       body = body + data;
   });
@@ -86,6 +100,18 @@ app.post('/create_process', (request, response) => {
       response.end();
     })
   });
+  */
+  
+  // body-parser이라는 middleware 사용 시
+  // body-parser가 동작하여
+  // callback 함수에서 request.body를 생성하게 된다.
+  var post = request.body;
+  var title = post.title;
+  var description = post.description;
+  fs.writeFile(`data/${title}`, description, 'utf8', function(err){
+    response.writeHead(302, {Location: `/page/${title}`});
+    response.end();
+  })
 })
 
 app.get('/update/:pageID', (request, response) => {
@@ -115,35 +141,23 @@ app.get('/update/:pageID', (request, response) => {
 })
 
 app.post('/update_process', (request, response) => {
-  var body = '';
-  request.on('data', function(data){
-      body = body + data;
-  });
-  request.on('end', function(){
-      var post = qs.parse(body);
-      var id = post.id;
-      var title = post.title;
-      var description = post.description;
-      fs.rename(`data/${id}`, `data/${title}`, function(error){
-        fs.writeFile(`data/${title}`, description, 'utf8', function(err){
-          response.redirect(`/page/${title}`)
-        })
-      });
+  var post = request.body;
+  var id = post.id;
+  var title = post.title;
+  var description = post.description;
+  fs.rename(`data/${id}`, `data/${title}`, function(error){
+    fs.writeFile(`data/${title}`, description, 'utf8', function(err){
+      response.redirect(`/page/${title}`)
+    })
   });
 })
 
 app.post('/delete_process', (request, response) => {
-  var body = '';
-  request.on('data', function(data){
-      body = body + data;
-  });
-  request.on('end', function () {
-    var post = qs.parse(body);
-    var id = post.id;
-    var filteredId = path.parse(id).base;
-    fs.unlink(`data/${filteredId}`, function (error) {
-      response.redirect('/')
-    })
+  var post = request.body;
+  var id = post.id;
+  var filteredId = path.parse(id).base;
+  fs.unlink(`data/${filteredId}`, function (error) {
+    response.redirect('/')
   })
 })
 
