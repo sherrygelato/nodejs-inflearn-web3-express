@@ -11,6 +11,9 @@ var sanitizeHtml = require('sanitize-html')
 var qs = require('querystring')
 const { request } = require('http')
 
+// public 안에서 static 찾기
+app.use(express.static('public'))
+
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
 /*
@@ -57,7 +60,9 @@ app.get('/', (request, response) => {
   var description = 'Hello, Node.js';
   var list = template.list(request.list);
   var html = template.HTML(title, list,
-    `<h2>${title}</h2>${description}`,
+    `<h2>${title}</h2>${description}
+    <img src="/images/star.jpg" style="width:300px; display:block; margin-top:10px;">
+    `,
     `<a href="/create">create</a>`
   );
   response.send(html);
@@ -76,27 +81,31 @@ app.get('/', (request, response) => {
   */
 })
 
-app.get('/page/:pageID', (request, response) => {
+app.get('/page/:pageID', (request, response, next) => {
   // console.log(request);
   console.log(request.list);
   var filteredId = path.parse(request.params.pageID).base;
   fs.readFile(`data/${filteredId}`, 'utf8', function(err, description){
-    var title = request.params.pageID;
-    var sanitizedTitle = sanitizeHtml(title);
-    var sanitizedDescription = sanitizeHtml(description, {
-      allowedTags:['h1']
-    });
-    var list = template.list(request.list);
-    var html = template.HTML(sanitizedTitle, list,
-      `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`,
-      ` <a href="/create">create</a>
-        <a href="/update/${sanitizedTitle}">update</a>
-        <form action="/delete_process" method="post">
-          <input type="hidden" name="id" value="${sanitizedTitle}">
-          <input type="submit" value="delete">
-        </form>`
-    );
-    response.send(html);
+    if (err) {
+      next(err);
+    } else {
+      var title = request.params.pageID;
+      var sanitizedTitle = sanitizeHtml(title);
+      var sanitizedDescription = sanitizeHtml(description, {
+        allowedTags:['h1']
+      });
+      var list = template.list(request.list);
+      var html = template.HTML(sanitizedTitle, list,
+        `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`,
+        ` <a href="/create">create</a>
+          <a href="/update/${sanitizedTitle}">update</a>
+          <form action="/delete_process" method="post">
+            <input type="hidden" name="id" value="${sanitizedTitle}">
+            <input type="submit" value="delete">
+          </form>`
+      );
+      response.send(html);
+    }
   });
 })
 
@@ -193,6 +202,19 @@ app.post('/delete_process', (request, response) => {
     response.redirect('/')
   })
 })
+
+// 404 middleware 추가
+// 순차적으로 실행 되기 때문에 더이상 실행되지 못하고
+// 여기까지 오면 못찾은 거니까 그때 404 상태코드를 보내줌
+app.use(function(req, res, next) {
+  res.status(404).send('Sorry cant find that!');
+});
+
+// error handling
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
 
 // app.listen(3000);
 app.listen(port, () => {
