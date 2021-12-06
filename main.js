@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const port = 3000
 
+var compression = require('compression')
 var bodyParser = require('body-parser')
 var fs = require('fs')
 var template = require('./lib/template.js')
@@ -29,6 +30,7 @@ app.get('/', function(req, res) {
   return res.send('Hello World!')
 });
 */
+app.use(compression());
 
 app.get('/', (request, response) => {
   fs.readdir('./data', function (error, filelist) {
