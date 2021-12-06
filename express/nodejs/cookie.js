@@ -1,8 +1,20 @@
 var http = require('http')
+var cookie = require('cookie')
+
+// 처음 Set-Cookie 했을 때 응답 헤더 => 주석처리 하니까 요청 헤더에 쿠키
 http.createServer(function (request, response) {
-    // 처음 Set-Cookie 했을 때 응답 헤더 => 주석처리 하니까 요청 헤더에 쿠키
-    // response.writeHead(200, {
-    //     'Set-Cookie': ['yummy_cookie=choco','tasty_cookie=strawberry']
-    // })
+    console.log(request.headers.cookie)
+    var cookies = {}
+    if (request.headers.cookie !== undefined) {
+        cookies = cookie.parse(request.headers.cookie)
+    }
+
+    console.log(cookies)
+    console.log(`yummy_cookie: ${cookies.yummy_cookie}`)
+    console.log(`tasty_cookie: ${cookies.tasty_cookie}`)
+    
+    response.writeHead(200, {
+        'Set-Cookie': ['yummy_cookie=choco','tasty_cookie=strawberry']
+    })
     response.end('Cookie!!')
 }).listen(3000)
