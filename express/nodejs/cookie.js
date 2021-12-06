@@ -20,7 +20,9 @@ http.createServer(function (request, response) {
         'Set-Cookie': [
             'yummy_cookie=choco',
             'tasty_cookie=strawberry',
-            `Permanent=cookiess; Max-Age=${60*60*24*30}` // 30일
+            `Permanent=cookiess; Max-Age=${60 * 60 * 24 * 30}`, // 30일
+            'Secure=Secure; Secure', // https 훨씬 더 안전하다 '쿠키=값; 중요한값'
+            'HttpOnly=HttpOnly; HttpOnly' // httpOnly 자바스크립트 안전
         ]
         // 오래 지속되는 쿠키 만들기 
         // Expires (절대적) 쿠키 만료
