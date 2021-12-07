@@ -60,6 +60,8 @@ function authIsOwner(request, response) {
   return isOwner;
 }
 
+// auth 관련 코드는 /를 router로 빼지 않고
+// main.js에 했을 때 적용됨
 function authStatusUI(request, response) {
   console.log('##### authStatusUI function')
   var authStatusUI = '<a href="/login">login</a>';
