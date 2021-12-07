@@ -6,6 +6,7 @@ var compression = require('compression')
 var bodyParser = require('body-parser')
 var fs = require('fs')
 var cookie = require('cookie');
+var template = require('./lib/template')
 
 // 보안 
 // HTTP 헤더를 적절히 설정하여 
@@ -44,6 +45,7 @@ app.get('/', function(req, res) {
 app.use(compression());
 
 function authIsOwner(request, response) {
+  console.log(`##### authIsOwner function`)
   var isOwner = false;
   var cookies = {};
   if (request.headers.cookie) { // 쿠키값이 있는 경우에만 실행
@@ -53,18 +55,41 @@ function authIsOwner(request, response) {
   if (cookies.email === 'test@example.com' && cookies.password === '1234321!') {
     isOwner = true;
   }
-  console.log(isOwner)
+  console.log(`authIsOwner : ${isOwner}`)
 
   return isOwner;
 }
 
+function authStatusUI(request, response) {
+  console.log('##### authStatusUI function')
+  var authStatusUI = '<a href="/login">login</a>';
+  
+  // 로그인 상태 체크
+  // var isOwner = authIsOwner(request, response)
+  if (authIsOwner(request, response)) {
+    console.log('logout')
+    authStatusUI = '<a href="/logout_process">logout</a>';
+  }
+  console.log(`authStatusUI : ${authStatusUI}`)
+  return authStatusUI
+}
 
 // get 방식으로 요청 들어오는 것만 처리 함
 app.get('*', function (request, response, next) {
   
-  // 로그인 상태 체크
-  var isOwner = authIsOwner(request, response)
-  console.log(isOwner)
+  // var authStatusUI = '<a href="/login">login</a>';
+  
+  // // 로그인 상태 체크
+  // var isOwner = authIsOwner(request, response)
+  // if (isOwner) {
+  //   authStatusUI = '<a href="/logout_process">logout</a>';
+  // }
+  // authStatusUI
+
+  authStatusUI(request, response)
+  
+  // console.log(`main result: ${isOwner}`)
+  // console.log(`main result: ${authStatusUI}`)
 
   fs.readdir('./data', function (error, filelist) {
     request.list = filelist;
