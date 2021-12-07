@@ -30,4 +30,19 @@ router.get('/', (request, response) => {
   */
 })
 
+router.get('/login', (request, response) =>{
+  var title = 'Login';
+  var list = template.list(request.list);
+  var html = template.HTML(title, list,
+    `
+    <form action="login_process" method="post">
+      <p><input type="text" name="email" placeholder="email"></p>
+      <p><input type="password" name="password" placeholder="password"></p>
+      <p><input type="submit"></p>
+    </form>`,
+    `<a href="/topic/create">create</a>`
+  );
+  response.send(html);
+})
+
 module.exports = router;
