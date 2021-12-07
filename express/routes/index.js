@@ -45,4 +45,26 @@ router.get('/login', (request, response) =>{
   response.send(html);
 })
 
+router.post('/login_process', (request, response) => {
+  var post = request.body;
+  if (post.email === 'test@example.com' && post.password === '1234321!') {
+    response.writeHead(302, {
+      'Set-Cookie': [
+        `email=${post.email}`,
+        `password=${post.password}`,
+        `nickname=sherrygelato`
+      ],
+      Location: '/'
+    })
+    response.end()
+  } else {
+    response.end('Who?')
+  }
+  // var id = post.id;
+  // var filteredId = path.parse(id).base;
+  // fs.unlink(`data/${filteredId}`, function (error) {
+  //   response.redirect('/')
+  // })
+})
+
 module.exports = router;
