@@ -5,6 +5,7 @@ const port = 3000
 var compression = require('compression')
 var bodyParser = require('body-parser')
 var fs = require('fs')
+var cookie = require('cookie');
 
 // 보안 
 // HTTP 헤더를 적절히 설정하여 
@@ -41,8 +42,30 @@ app.get('/', function(req, res) {
 // 순서대로 (즉, 여러 개 미들웨어 가능)
 // 서로와 서로를 연결해주는 소프트웨어 : 미들웨어
 app.use(compression());
+
+function authIsOwner(request, response) {
+  var isOwner = false;
+  var cookies = {};
+  if (request.headers.cookie) { // 쿠키값이 있는 경우에만 실행
+    cookies = cookie.parse(request.headers.cookie)
+  }
+  console.log(cookies)
+  if (cookies.email === 'test@example.com' && cookies.password === '1234321!') {
+    isOwner = true;
+  }
+  console.log(isOwner)
+
+  return isOwner;
+}
+
+
 // get 방식으로 요청 들어오는 것만 처리 함
 app.get('*', function (request, response, next) {
+  
+  // 로그인 상태 체크
+  var isOwner = authIsOwner(request, response)
+  console.log(isOwner)
+
   fs.readdir('./data', function (error, filelist) {
     request.list = filelist;
     next();
