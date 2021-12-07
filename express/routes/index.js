@@ -67,4 +67,17 @@ router.post('/login_process', (request, response) => {
   // })
 })
 
+router.post('/logout_process', (request, response) => {
+  var post = request.body;
+  response.writeHead(302, {
+    'Set-Cookie': [
+      `email=; Max-Age=0`,
+      `password=; Max-Age=0`,
+      `nickname=; Max-Age=0`
+    ],
+    Location: '/'
+  })
+  response.end()
+})
+
 module.exports = router;
